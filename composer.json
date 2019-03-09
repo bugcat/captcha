@@ -1,0 +1,23 @@
+{
+    "name": "bugcat/captcha",
+    "description": "PHP captcha with Chinese",
+    "type": "package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "bug",
+            "email": "i@bug.cat"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0",
+        "ext-gd": "*",
+        "intervention/image": "~2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bugcat\\Captcha\\": "src/"
+        }
+    }
+}
