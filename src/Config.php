@@ -9,7 +9,7 @@ class Config extends BaseConfig
      *
      * @const string
      */
-    const DEFAULT_T = 'chs';
+    const DEFAULT_T = 'CHS';
     
     /**
      * The default font in font pool.
@@ -17,6 +17,41 @@ class Config extends BaseConfig
      * @const string
      */
     const DEFAULT_F = 'simhei';
+    
+    /**
+     * The default border whether needed.
+     *
+     * @const int
+     */
+    const DFT_BORDER = 1;
+    
+    /**
+     * The default charnum.
+     *
+     * @const int
+     */
+    const DFT_CHARNUM = 4;
+    
+    /**
+     * The default fontsize.
+     *
+     * @const int
+     */
+    const DFT_FONTSIZE = 16;
+    
+    /**
+     * The min fontsize.
+     *
+     * @const int
+     */
+    const MIN_FONTSIZE = 8;
+    
+    /**
+     * The default code direction.
+     *
+     * @const int
+     */
+    const DFT_CODEDIR = 0;
     
     
     public function __construct() 
@@ -30,30 +65,89 @@ class Config extends BaseConfig
      * @param  array  $config
      * @return array
      */
-    public function get($config = [])
+    public static function get($config = [])
     {
-        $charnum = 4; //字符数
-        $text = 'CHS'; //字符池
+        $border   = self::setBorder($config['border'] ?? false); 
+        $charnum  = self::setCharNum($config['charnum'] ?? 0); 
+        $fontsize = self::setFontSize($config['fontsize'] ?? 0); 
+        $codedir  = self::setCodeDir($config['codedir'] ?? false); 
+        $font     = self::setFont($config['font'] ?? false);
+        $codes    = self::setCodes($config['text'] ?? false, $charnum);
+        
         return [
-            'border'    => 1, //是否要边框 1要:0不要
-            'charnum'   => $charnum,
-            'fontsize'  => 16, //字体大小
-            'direction' => 0, //文本方向 0:水平 1:垂直
-            'font'      => $this->setFont($config['font'] ?? false), //字体文件路径
-            'codes'     => $this->setCodes($text, $charnum), //随机生成验证码文字组
+            'border'    => $border, //whether need border (1yes 0no)
+            'charnum'   => $charnum, //the char number
+            'fontsize'  => $fontsize, //the font size
+            'codedir'   => $codedir, //the code direction (0horizontal 1vertical)
+            'font'      => $font, //the font file path
+            'codes'     => $codes, //Randomly generate captcha code array
         ];
     }
     
     /**
-     * Set the font config.
+     * Set whether need border.
+     *
+     * @param  int  $border
+     * @return int
+     */
+    private static function setBorder($border = false)
+    {
+        $border = false === $border ? self::DFT_BORDER : $border;
+        $border = intval($border);
+        $border = in_array($border, [0, 1]) ? $border : self::DFT_BORDER;
+        return $border;
+    }
+    
+    /**
+     * Set the char number.
+     *
+     * @param  int  $charnum
+     * @return int
+     */
+    private static function setCharNum($charnum = 0)
+    {
+        $charnum = intval($charnum);
+        $charnum = $charnum > 0 ? $charnum : self::DFT_CHARNUM;
+        return $charnum;
+    }
+    
+    /**
+     * Set the font size.
+     *
+     * @param  int  $fontsize
+     * @return int
+     */
+    private static function setFontSize($fontsize = 0)
+    {
+        $fontsize = intval($fontsize);
+        $fontsize = $fontsize >= self::MIN_FONTSIZE ? $fontsize : self::DFT_FONTSIZE;
+        return $fontsize;
+    }
+    
+    /**
+     * Set the code direction.
+     *
+     * @param  int  $codedir
+     * @return int
+     */
+    private static function setCodeDir($codedir = false)
+    {
+        $codedir = false === $codedir ? self::DFT_CODEDIR : $codedir;
+        $codedir = intval($codedir);
+        $codedir = in_array($codedir, [0, 1]) ? $codedir : self::DFT_CODEDIR;
+        return $codedir;
+    }
+    
+    /**
+     * Set the font file path.
      *
      * @param  string  $font
-     * @return array
+     * @return string
      */
-    private function setFont($font = false)
+    private static function setFont($font = false)
     {
         $font = empty($font) ? false : trim($font);
-        return $this->getFontFile($font, self::DEFAULT_F);
+        return self::getFontFile($font, self::DEFAULT_F);
     }
     
     /**
@@ -63,10 +157,9 @@ class Config extends BaseConfig
      * @param  int  $charnum
      * @return array
      */
-    private function setCodes($text, $charnum = 4)
+    private static function setCodes($text, $charnum = 4)
     {
-        
-        $str = $this->getTextstr($text, self::DEFAULT_T);
+        $str = self::getTextstr($text, self::DEFAULT_T);
         
         $code_arr = [];
         $rand_max = mb_strlen($str, 'utf-8') - 1;
